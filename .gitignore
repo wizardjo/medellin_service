@@ -10,6 +10,8 @@ __pycache__/
 .Python
 build/
 develop-eggs/
+postgres_data/
+database.db
 dist/
 downloads/
 eggs/
