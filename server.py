@@ -7,6 +7,7 @@ from users import user
 from users.user_schemas import MissionRequest, MissionResponse, UserRequest, UserResponse
 from users.user import User
 from sqlalchemy.orm import Session
+from sqlalchemy import delete, select
 from datetime import datetime
 
 app = FastAPI()
@@ -17,10 +18,23 @@ database.Base.metadata.create_all(bind=engine)
 def index():
     return { 'message': 'Server alive!', 'time': datetime.now() }
 
+@app.get('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    results = select(User).where(User.id == user_id)
+    user = db.scalars(results).one()
+    return user
+
 @app.get('/users', status_code=status.HTTP_200_OK, response_model=List[UserResponse])
 def get_all_users(db: Session = Depends(get_db)):
-    all_users = db.query(User).all()
-    return all_users
+    return db.query(User).all()
+
+@app.delete('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponse)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    results = select(User).where(User.id == user_id)
+    user = db.scalars(results).one()
+    db.delete(user)
+    db.commit()
+    return user
 
 @app.get('/missions', status_code=status.HTTP_200_OK, response_model=List[MissionResponse])
 def get_all_missions(db: Session = Depends(get_db)):
