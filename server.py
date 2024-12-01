@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, status
 from typing import List
 from db import database
 from db.database import engine, get_db
-from mission import Mission
+from missions.mission import Mission
 from users import user
 from users.user_schemas import MissionRequest, MissionResponse, UserRequest, UserResponse
 from users.user import User
