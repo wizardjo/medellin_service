@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, status
 from typing import List
 from db import database
@@ -11,7 +12,6 @@ from sqlalchemy import delete, select
 from datetime import datetime
 
 app = FastAPI()
-
 database.Base.metadata.create_all(bind=engine)
 
 @app.get('/')
