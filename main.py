@@ -11,13 +11,13 @@ from sqlalchemy import delete, select
 from datetime import datetime
 
 app = FastAPI()
-#database.Base.metadata.create_all(bind=engine)
+database.Base.metadata.create_all(bind=engine)
 
 @app.get('/')
 def index():
     return { 'message': 'Server alive!', 'time': datetime.now() }
 
-""" @app.get('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponse)
+@app.get('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     results = select(User).where(User.id == user_id)
     user = db.scalars(results).one()
@@ -54,4 +54,4 @@ def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user.__dict__ """
+    return new_user.__dict__
