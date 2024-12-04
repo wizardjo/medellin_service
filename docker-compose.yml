@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+ postgres:
+   image: postgres:latest
+   restart: always
+   container_name: contenedor
+   environment:
+     POSTGRES_DB: mydb
+     POSTGRES_USER: admin
+     POSTGRES_PASSWORD: password
+     POSTGRES_HOST: postgres
+   ports:
+     - "5432:5432"
+   volumes:
+     - ./postgres_data:/var/lib/postgresql/data
+     - /Users/jorgeochoa/Repos/Test/init.sql:/docker-entrypoint-initdb.d/init.sql
