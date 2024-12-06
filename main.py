@@ -4,8 +4,9 @@ from typing import List
 from db import database
 from db.database import engine, get_db
 from missions.mission import Mission
+from builds.build import Build
 from users import user
-from users.user_schemas import MissionRequest, MissionResponse, UserRequest, UserResponse
+from schemas.schemas import BuildRequest, BuildResponse, MissionRequest, MissionResponse, UserRequest, UserResponse
 from users.user import User
 from sqlalchemy.orm import Session
 from sqlalchemy import delete, select
@@ -80,10 +81,10 @@ def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
 # POST buildings
 # This method create a new BUILD
 # The parameter is post_build: BuildRequest
-@app.post('/users', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
-    new_user = User(**post_user.model_dump())
-    db.add(new_user)
+@app.post('/build', status_code=status.HTTP_201_CREATED, response_model=BuildResponse)
+def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
+    new_build= Build(**post_build.model_dump())
+    db.add(new_build)
     db.commit()
-    db.refresh(new_user)
-    return new_user.__dict__
+    db.refresh(new_build)
+    return new_build.__dict__

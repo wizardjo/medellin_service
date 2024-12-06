@@ -1,7 +1,7 @@
 from db.database import Base
 from sqlalchemy import Column, Integer, String
 
-class Buid(Base):
+class Build(Base):
     __tablename__ = "builds"
 
     id = Column(Integer,primary_key=True,nullable=False,autoincrement=True)

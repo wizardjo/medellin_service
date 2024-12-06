@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+#USER
 class UserBase(BaseModel):
   name: str
   surname: str
@@ -19,6 +20,7 @@ class UserResponse(UserBase):
   class Config:
     orm_mode = True
 
+#MISSION
 class MissionBase(BaseModel):
   name: str
   description: str
@@ -35,3 +37,26 @@ class MissionResponse(MissionBase):
 
   class Config:
     orm_mode = True
+ 
+#BUILD   
+class BuildBase(BaseModel):
+  name: str
+  description: str
+  cost: int
+  previewBuild: str
+  experienceRequire : int
+
+  class Config:
+    orm_mode = True
+
+class BuildRequest(BuildBase):
+  class Config:
+    orm_mode = True
+
+class BuildResponse(BuildBase):
+  id: int
+
+  class Config:
+    orm_mode = True
+
+#
