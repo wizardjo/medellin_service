@@ -20,7 +20,7 @@ database.Base.metadata.create_all(bind=engine)
 #Root API
 @app.get('/')
 def index():
-    return { 'message': 'Server alive', 'time': datetime.now() }
+    return { 'message': 'Server alive', 'times': datetime.now() }
 
 #GET USER
 # This method in the users route searchs user's id
