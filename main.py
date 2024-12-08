@@ -81,7 +81,7 @@ def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
 # POST buildings
 # This method create a new BUILD
 # The parameter is post_build: BuildRequest
-@app.post('/build', status_code=status.HTTP_201_CREATED, response_model=BuildResponse)
+@app.post('/builds', status_code=status.HTTP_201_CREATED, response_model=BuildResponse)
 def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
     new_build= Build(**post_build.model_dump())
     db.add(new_build)
