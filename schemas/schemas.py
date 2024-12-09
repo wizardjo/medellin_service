@@ -6,6 +6,7 @@ class UserBase(BaseModel):
   surname: str
   email: str
   password: str
+  registerDateTime: str
 
   class Config:
     orm_mode = True
@@ -59,4 +60,40 @@ class BuildResponse(BuildBase):
   class Config:
     orm_mode = True
 
-#
+#CHARACTER
+class CharacterBase(BaseModel):
+  name: str
+  description: str
+
+  class Config:
+    orm_mode = True
+
+class CharacterRequest(CharacterBase):
+  class Config:
+    orm_mode = True
+
+class CharacterResponse(CharacterBase):
+  id: int
+
+  class Config:
+    orm_mode = True
+    
+    
+#CELEBRATION
+class CelebrationBase(BaseModel):
+  name: str
+  description: str
+  date : str
+
+  class Config:
+    orm_mode = True
+
+class CelebrationRequest(CelebrationBase):
+  class Config:
+    orm_mode = True
+
+class CelebrationResponse(CelebrationBase):
+  id: int
+
+  class Config:
+    orm_mode = True
