@@ -3,10 +3,10 @@ from pydantic import BaseModel
 #USER
 class UserBase(BaseModel):
   name: str
-  surname: str
   email: str
   password: str
-  registerDateTime: str
+  registerdatetime: str
+  disabled: bool
 
   class Config:
     orm_mode = True

@@ -10,7 +10,7 @@ from celebrations.celebration import Celebration
 from schemas.schemas import BuildRequest, BuildResponse, MissionRequest, MissionResponse, UserRequest, UserResponse, CharacterRequest,CharacterResponse, CelebrationRequest, CelebrationResponse
 from users.user import User
 from sqlalchemy.orm import Session
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from datetime import datetime
 
 tags_metadata = [
@@ -58,20 +58,29 @@ def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user.__dict__
 
-#GET USER
+# GET USER
 # This method in the users route searchs user's id
 # The param is user id
 @app.get('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponse, tags=["Users"])
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    results = select(User).where(User.id == user_id)
-    user = db.scalars(results).one()
-    return user
+def get_user(user_id: int):
+    query = text('SELECT * from users WHERE id={0}'.format(user_id))
+    with engine.connect() as con:
+        results = con.execute(query)
+        if results is None:
+            return None
+        return results.one()
+
 
 # GET
 # This method get all user
 @app.get('/users', status_code=status.HTTP_200_OK, response_model=List[UserResponse], tags=["Users"])
 def get_all_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+    query = text('SELECT * from users')
+    with engine.connect() as con:
+        results = con.execute(query)
+        if results is None:
+            return None
+        return results
 
 # DELETE
 # This method DELETE the user by ID
