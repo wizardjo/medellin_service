@@ -1,17 +1,20 @@
 import os
-from fastapi import FastAPI, Depends, status
+from datetime import datetime
 from typing import List
+
+from fastapi import FastAPI, Depends, status
+from sqlalchemy import select, text
+from sqlalchemy.orm import Session
+
+from buildings.build import Build
+from celebrations.celebration import Celebration
+from charaters.character import Character
 from db import database
 from db.database import engine, get_db
 from missions.mission import Mission
-from buildings.build import Build
-from charaters.character import Character
-from celebrations.celebration import Celebration
-from schemas.schemas import BuildRequest, BuildResponse, MissionRequest, MissionResponse, UserRequest, UserResponse, CharacterRequest,CharacterResponse, CelebrationRequest, CelebrationResponse
+from schemas.schemas import BuildRequest, BuildResponse, MissionRequest, MissionResponse, UserRequest, UserResponse, \
+    CharacterRequest, CharacterResponse, CelebrationRequest, CelebrationResponse
 from users.user import User
-from sqlalchemy.orm import Session
-from sqlalchemy import delete, select, text
-from datetime import datetime
 
 tags_metadata = [
     {
@@ -53,10 +56,13 @@ def index():
 @app.post('/users', status_code=status.HTTP_201_CREATED, response_model=UserResponse, tags=["Users"])
 def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
     new_user = User(**post_user.model_dump())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user.__dict__
+    query1 = text(f"INSERT INTO users(name, email, password, registerdatetime) "
+                  f"VALUES('{post_user.name}','{post_user.email}','{post_user.password}','{datetime.now()}')")
+    with engine.connect() as con:
+        a = con.execute(query1)
+        con.commit()
+        new_user.id = 0
+        return new_user
 
 # GET USER
 # This method in the users route searchs user's id
