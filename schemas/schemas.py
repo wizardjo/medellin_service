@@ -6,7 +6,6 @@ class UserBase(BaseModel):
   email: str
   password: str
   registerdatetime: str
-  disabled: bool
 
   class Config:
     orm_mode = True
