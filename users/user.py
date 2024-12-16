@@ -9,5 +9,5 @@ class User(Base):
     name = Column(String,nullable=False)
     email = Column(String,nullable=False)
     password = Column(String,nullable=False)
-    registerdatetime = Column(Date,nullable=False)
+    registerdatetime = Column(String,nullable=False)
     disabled = Column(Boolean,nullable=False)
