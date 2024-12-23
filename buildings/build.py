@@ -8,5 +8,5 @@ class Build(Base):
     name = Column(String,nullable=False)
     description = Column(String,nullable=False)
     cost = Column(Integer,nullable=False)
-    previewBuild = Column(String,nullable=False)
-    experienceRequire = Column(Integer,nullable=False)
+    previewbuild = Column(String,nullable=False)
+    experiencerequire = Column(Integer,nullable=False)
