@@ -342,8 +342,8 @@ from sqlalchemy.exc import SQLAlchemyError
 def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
     # Consulta SQL segura con parámetros
     query = text(
-        "INSERT INTO buildings (name, description, cost, previewBuild, experienceRequire) "
-        "VALUES (:name, :description, :cost, :previewBuild, :experienceRequire) RETURNING id"
+        "INSERT INTO buildings (name, description, cost, preview_build, experience_require) "
+        "VALUES (:name, :description, :cost, :preview_build, :experience_require) RETURNING id"
     )
     with engine.connect() as con:
         try:
@@ -354,8 +354,8 @@ def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
                     "name": post_build.name,
                     "description": post_build.description,
                     "cost": post_build.cost,
-                    "previewBuild": post_build.previewBuild,
-                    "experienceRequire": post_build.experienceRequire,
+                    "preview_build": post_build.preview_build,
+                    "experience_require": post_build.experience_require,
                 },
             )
 
@@ -375,8 +375,8 @@ def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
                 name=post_build.name,
                 cost=post_build.cost,
                 description=post_build.description,
-                previewBuild=post_build.previewBuild,
-                experienceRequire=post_build.experienceRequire,
+                preview_build=post_build.preview_build,
+                experience_require=post_build.experience_require,
             )
             return new_build
 

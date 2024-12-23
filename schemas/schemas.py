@@ -43,8 +43,8 @@ class BuildBase(BaseModel):
   name: str
   description: str
   cost: int
-  previewBuild: str
-  experienceRequire : int
+  preview_build: str
+  experience_require : int
 
   class Config:
     orm_mode = True
