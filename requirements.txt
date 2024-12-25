@@ -1,8 +1,17 @@
-fastapi==0.115.6
-passlib==1.7.4
-psycopg2==2.9.10
-pydantic==2.10.4
-PyJWT==2.4.0
-PyJWT==2.10.1
-python_jose==3.3.0
-SQLAlchemy==2.0.25
+# This template is a low-dependency template.
+# By default there is no requirements added here.
+# Add the requirements you need to this file.
+# or run `make init` to create this file automatically based on the template.
+# You can also run `make switch-to-poetry` to use the poetry package manager.
+fastapi
+uvicorn
+sqlmodel
+typer
+dynaconf
+jinja2
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+psycopg2-binary
+passlib
+jwt
