@@ -1,12 +1,17 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
-
+from psycopg2.extras import RealDictCursor
 from fastapi import FastAPI, Depends, HTTPException, Response, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError
+import jwt
+import psycopg2
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from passlib.hash import bcrypt  # Para hashear contraseñas
 
+from authentication.auth import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY, create_access_token, verify_password
 from buildings.build import Build
 from celebrations.celebration import Celebration
 from charaters.character import Character
@@ -39,15 +44,51 @@ tags_metadata = [
 ]
 
 app = FastAPI()
-url = os.environ["DB_URL"]
-print(url)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 database.Base.metadata.create_all(bind=engine)
 
+def get_db_connection():
+    conn = psycopg2.connect(os.environ['DB_URL'], cursor_factory=RealDictCursor)
+    return conn
 
-# Root API
-@app.get("/")
-def index():
-    return {"message": "Server alive!", "time": datetime.now()}
+# Dependencia para verificar el token
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            try:
+                payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+                username: str = payload.get("sub")
+                if username is None:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                # Verificar si el usuario existe en la base de datos
+                cur.execute("SELECT * FROM users WHERE email = %s", (username,))
+                user = cur.fetchone()
+                if user is None:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+                return user
+            except JWTError:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+# Endpoint para obtener un token
+@app.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            # Obtener usuario por nombre
+            cur.execute("SELECT * FROM users WHERE email = %s", (form_data.username,))
+            user = cur.fetchone()
+            if not user or not verify_password(form_data.password, user["password"]):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid username or password",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            # Crear un token de acceso
+            access_token = create_access_token(
+                data={"sub": user["email"]},
+                expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+            )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 # USER start endpoints user
@@ -60,7 +101,7 @@ def index():
     response_model=UserResponse,
     tags=["Users"],
 )
-def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
+def create_user(post_user: UserRequest):
     # Hasheamos la contraseña antes de guardarla
     hashed_password = bcrypt.hash(post_user.password)
 
@@ -116,23 +157,23 @@ def create_user(post_user: UserRequest, db: Session = Depends(get_db)):
 # This method in the users route searchs user's id
 # The param is user id
 @app.get(
-    "/users/{user_id}",
+    "/users/{email}",
     status_code=status.HTTP_200_OK,
     response_model=UserResponse,
     tags=["Users"],
 )
-def get_user(user_id: int):
+def get_user(email: str, current_user: dict = Depends(get_current_user)):
     # Consulta SQL segura utilizando parámetros
-    query = text("SELECT * FROM users WHERE id = :id")
+    query = text("SELECT * FROM users WHERE email = :email")
 
     with engine.connect() as con:
         # Ejecutamos la consulta con parámetros para evitar inyección SQL
-        result = con.execute(query, {"id": user_id}).fetchone()
+        result = con.execute(query, {"email": email}).fetchone()
 
         if result is None:  # Si no se encuentra el usuario
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {user_id} not found",
+                detail=f"User with id {email} not found",
             )
 
         #  retornarlo como JSON
@@ -147,7 +188,7 @@ def get_user(user_id: int):
     response_model=List[UserResponse],
     tags=["Users"],
 )
-def get_all_users(db: Session = Depends(get_db)):
+def get_all_users(current_user: dict = Depends(get_current_user)):
     # Consulta SQL segura
     query = text("SELECT * FROM users")
 
@@ -163,12 +204,11 @@ def get_all_users(db: Session = Depends(get_db)):
         # Convertimos los resultados a una lista de diccionarios
         return results
 
-
 # DELETE
 # This method DELETE the user by ID
 # The param is user_id
 @app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM users WHERE id = :id")
 
@@ -206,7 +246,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def create_mission(post_mission: MissionRequest, db: Session = Depends(get_db)):
+def create_mission(post_mission: MissionRequest):
     # Consulta SQL segura con parámetros
     query = text(
         "INSERT INTO missions (name, description) VALUES (:name, :description) RETURNING id"
@@ -247,7 +287,7 @@ def create_mission(post_mission: MissionRequest, db: Session = Depends(get_db)):
     response_model=List[MissionResponse],
     tags=["Missions"],
 )
-def get_all_missions(db: Session = Depends(get_db)):
+def get_all_missions():
     query = text("SELECT * from missions")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -271,7 +311,7 @@ def get_all_missions(db: Session = Depends(get_db)):
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def get_mission(mission_id: int, db: Session = Depends(get_db)):
+def get_mission(mission_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from missions WHERE id=:id")
     with engine.connect() as con:
@@ -297,7 +337,7 @@ def get_mission(mission_id: int, db: Session = Depends(get_db)):
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def delete_mission(mission_id: int, db: Session = Depends(get_db)):
+def delete_mission(mission_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE from missions WHERE id={0}".format(mission_id))
     with engine.connect() as con:
@@ -339,7 +379,7 @@ from sqlalchemy.exc import SQLAlchemyError
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
+def create_build(post_build: BuildRequest):
     # Consulta SQL segura con parámetros
     query = text(
         "INSERT INTO buildings (name, description, cost, preview_build, experience_require) "
@@ -402,7 +442,7 @@ def create_build(post_build: BuildRequest, db: Session = Depends(get_db)):
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def get_build(build_id: int, db: Session = Depends(get_db)):
+def get_build(build_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from buildings WHERE id=:id")
     with engine.connect() as con:
@@ -425,7 +465,7 @@ def get_build(build_id: int, db: Session = Depends(get_db)):
     response_model=List[BuildResponse],
     tags=["Buildings"],
 )
-def get_all_buildings(db: Session = Depends(get_db)):
+def get_all_buildings():
     query = text("SELECT * FROM buildings")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -447,7 +487,7 @@ def get_all_buildings(db: Session = Depends(get_db)):
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def delete_build(build_id: int, db: Session = Depends(get_db)):
+def delete_build(build_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM buildings WHERE id = :id")
     with engine.connect() as con:
@@ -486,7 +526,7 @@ def delete_build(build_id: int, db: Session = Depends(get_db)):
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def create_character(post_character: CharacterRequest, db: Session = Depends(get_db)):
+def create_character(post_character: CharacterRequest):
     # Consulta SQL segura con parámetros
     query = text("INSERT INTO characters (name, description) RETURNING id")
     with engine.connect() as con:
@@ -529,7 +569,7 @@ def create_character(post_character: CharacterRequest, db: Session = Depends(get
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def get_character(character_id: int, db: Session = Depends(get_db)):
+def get_character(character_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from characters WHERE id=:id")
     with engine.connect() as con:
@@ -554,7 +594,7 @@ def get_character(character_id: int, db: Session = Depends(get_db)):
     response_model=List[CharacterResponse],
     tags=["Characters"],
 )
-def get_all_characters(db: Session = Depends(get_db)):
+def get_all_characters():
     query = text("SELECT * from characters")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -575,7 +615,7 @@ def get_all_characters(db: Session = Depends(get_db)):
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def delete_build(character_id: int, db: Session = Depends(get_db)):
+def delete_build(character_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM characters WHERE id = :id")
     with engine.connect() as con:
@@ -615,7 +655,7 @@ def delete_build(character_id: int, db: Session = Depends(get_db)):
     tags=["Celebrations"],
 )
 def create_celebration(
-    post_celebration: CelebrationRequest, db: Session = Depends(get_db)
+    post_celebration: CelebrationRequest
 ):
     # Consulta SQL segura con parámetros
     query = text(
@@ -663,7 +703,7 @@ def create_celebration(
     response_model=CelebrationResponse,
     tags=["Celebrations"],
 )
-def get_celebration(celebration_id: int, db: Session = Depends(get_db)):
+def get_celebration(celebration_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from celebrations WHERE id=:id")
     with engine.connect() as con:
@@ -688,7 +728,7 @@ def get_celebration(celebration_id: int, db: Session = Depends(get_db)):
     response_model=List[CelebrationResponse],
     tags=["Celebrations"],
 )
-def get_all_celebrations(db: Session = Depends(get_db)):
+def get_all_celebrations():
     query = text("SELECT * from celebrations")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -711,7 +751,7 @@ def get_all_celebrations(db: Session = Depends(get_db)):
     response_model=CelebrationResponse,
     tags=["Celebrations"],
 )
-def delete_build(celebration_id: int, db: Session = Depends(get_db)):
+def delete_build(celebration_id: int):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM celebrations WHERE id = :id")
     with engine.connect() as con:
