@@ -1,9 +1,7 @@
 # Función para crear una conexión a la base de datos
 from datetime import datetime, timedelta
-import os
 from fastapi import Depends
 import jwt
-import psycopg2
 from passlib.context import CryptContext
 
 # Configuración de seguridad
