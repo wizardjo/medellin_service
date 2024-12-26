@@ -528,7 +528,9 @@ def delete_build(build_id: int):
 )
 def create_character(post_character: CharacterRequest):
     # Consulta SQL segura con parámetros
-    query = text("INSERT INTO characters (name, description) RETURNING id")
+    query = text(
+    "INSERT INTO characters (name, description) VALUES (:name, :description) RETURNING id"
+    )
     with engine.connect() as con:
         try:
             # Ejecutamos la consulta con parámetros
