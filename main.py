@@ -86,7 +86,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def create_mission(post_mission: MissionRequest):
+def create_mission(post_mission: MissionRequest, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura con parámetros
     query = text(
         "INSERT INTO missions (name, description) VALUES (:name, :description) RETURNING id"
@@ -127,7 +127,7 @@ def create_mission(post_mission: MissionRequest):
     response_model=List[MissionResponse],
     tags=["Missions"],
 )
-def get_all_missions():
+def get_all_missions(current_user: dict = Depends(users.get_current_user)):
     query = text("SELECT * from missions")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -151,7 +151,7 @@ def get_all_missions():
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def get_mission(mission_id: int):
+def get_mission(mission_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from missions WHERE id=:id")
     with engine.connect() as con:
@@ -177,7 +177,7 @@ def get_mission(mission_id: int):
     response_model=MissionResponse,
     tags=["Missions"],
 )
-def delete_mission(mission_id: int):
+def delete_mission(mission_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE from missions WHERE id={0}".format(mission_id))
     with engine.connect() as con:
@@ -219,7 +219,7 @@ from sqlalchemy.exc import SQLAlchemyError
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def create_build(post_build: BuildRequest):
+def create_build(post_build: BuildRequest, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura con parámetros
     query = text(
         "INSERT INTO buildings (name, description, cost, preview_build, experience_require) "
@@ -282,7 +282,7 @@ def create_build(post_build: BuildRequest):
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def get_build(build_id: int):
+def get_build(build_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from buildings WHERE id=:id")
     with engine.connect() as con:
@@ -305,7 +305,7 @@ def get_build(build_id: int):
     response_model=List[BuildResponse],
     tags=["Buildings"],
 )
-def get_all_buildings():
+def get_all_buildings(current_user: dict = Depends(users.get_current_user)):
     query = text("SELECT * FROM buildings")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -327,7 +327,7 @@ def get_all_buildings():
     response_model=BuildResponse,
     tags=["Buildings"],
 )
-def delete_build(build_id: int):
+def delete_build(build_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM buildings WHERE id = :id")
     with engine.connect() as con:
@@ -366,7 +366,7 @@ def delete_build(build_id: int):
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def create_character(post_character: CharacterRequest):
+def create_character(post_character: CharacterRequest, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura con parámetros
     query = text(
     "INSERT INTO characters (name, description) VALUES (:name, :description) RETURNING id"
@@ -411,7 +411,7 @@ def create_character(post_character: CharacterRequest):
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def get_character(character_id: int):
+def get_character(character_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from characters WHERE id=:id")
     with engine.connect() as con:
@@ -436,7 +436,7 @@ def get_character(character_id: int):
     response_model=List[CharacterResponse],
     tags=["Characters"],
 )
-def get_all_characters():
+def get_all_characters(current_user: dict = Depends(users.get_current_user)):
     query = text("SELECT * from characters")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -457,7 +457,7 @@ def get_all_characters():
     response_model=CharacterResponse,
     tags=["Characters"],
 )
-def delete_build(character_id: int):
+def delete_build(character_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM characters WHERE id = :id")
     with engine.connect() as con:
@@ -497,8 +497,7 @@ def delete_build(character_id: int):
     tags=["Celebrations"],
 )
 def create_celebration(
-    post_celebration: CelebrationRequest
-):
+    post_celebration: CelebrationRequest, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura con parámetros
     query = text(
         "INSERT INTO celebrations (name, description, date) VALUES (:name, :description, :date) RETURNING id"
@@ -545,7 +544,7 @@ def create_celebration(
     response_model=CelebrationResponse,
     tags=["Celebrations"],
 )
-def get_celebration(celebration_id: int):
+def get_celebration(celebration_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("SELECT * from celebrations WHERE id=:id")
     with engine.connect() as con:
@@ -570,7 +569,7 @@ def get_celebration(celebration_id: int):
     response_model=List[CelebrationResponse],
     tags=["Celebrations"],
 )
-def get_all_celebrations():
+def get_all_celebrations(current_user: dict = Depends(users.get_current_user)):
     query = text("SELECT * from celebrations")
     with engine.connect() as con:
         # Ejecutamos la consulta
@@ -593,7 +592,7 @@ def get_all_celebrations():
     response_model=CelebrationResponse,
     tags=["Celebrations"],
 )
-def delete_build(celebration_id: int):
+def delete_build(celebration_id: int, current_user: dict = Depends(users.get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM celebrations WHERE id = :id")
     with engine.connect() as con:

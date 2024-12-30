@@ -159,7 +159,7 @@ def get_all_users(current_user: dict = Depends(get_current_user)):
 # This method DELETE the user by ID
 # The param is user_id
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
-def delete_user(user_id: int):
+def delete_user(user_id: int, current_user: dict = Depends(get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM users WHERE id = :id")
 
