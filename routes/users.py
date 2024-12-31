@@ -1,28 +1,30 @@
-from datetime import datetime
 import os
-from typing import List
 import bcrypt
+import psycopg2
+import jwt
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
-import jwt
-import psycopg2
+from datetime import datetime
+from typing import List
 from sqlalchemy import text
 from psycopg2.extras import RealDictCursor
 from passlib.hash import bcrypt  # Para hashear contraseñas
-
 from authentication.auth import ALGORITHM, SECRET_KEY
 from schemas.schemas import UserRequest, UserResponse
 from users.user import User
-from db.database import engine, get_db
+from db.database import engine
 
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def get_db_connection():
-    conn = psycopg2.connect(os.environ['DB_URL'], cursor_factory=RealDictCursor)
+    conn = psycopg2.connect(os.environ["DB_URL"], cursor_factory=RealDictCursor)
     return conn
+
 
 # Dependencia para verificar el token
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -32,15 +34,23 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
                 payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
                 username: str = payload.get("sub")
                 if username is None:
-                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                    )
                 # Verificar si el usuario existe en la base de datos
                 cur.execute("SELECT * FROM users WHERE email = %s", (username,))
                 user = cur.fetchone()
                 if user is None:
-                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="User not found",
+                    )
                 return user
             except JWTError:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                )
+
 
 # USER start endpoints user
 # POST USER
@@ -155,10 +165,13 @@ def get_all_users(current_user: dict = Depends(get_current_user)):
         # Convertimos los resultados a una lista de diccionarios
         return results
 
+
 # DELETE
 # This method DELETE the user by ID
 # The param is user_id
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
+@router.delete(
+    "/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"]
+)
 def delete_user(user_id: int, current_user: dict = Depends(get_current_user)):
     # Consulta SQL segura utilizando parámetros
     query = text("DELETE FROM users WHERE id = :id")
@@ -184,4 +197,6 @@ def delete_user(user_id: int, current_user: dict = Depends(get_current_user)):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"An error occurred while deleting the user: {str(e)}",
             )
+
+
 # end user
