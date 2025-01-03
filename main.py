@@ -2,6 +2,7 @@ import os
 import jwt
 import psycopg2
 
+
 from datetime import timedelta
 from typing import List
 from psycopg2.extras import RealDictCursor
@@ -17,14 +18,12 @@ from authentication.auth import (
 )
 from db import database
 from db.database import engine
-from routes import users, buildings, celebrations, characters, missions
-from users.user import User
+from routes import users, buildings, celebrations, characters, missions, user_events
+
 
 tags_metadata = [
-    {
-        "name": "users",
-        "description": "Operations with users.",
-    },
+    {"name": "users", "description": "Operations with users."},
+    {"name": "user events", "description": "Operations for events."},
     {"name": "missions", "description": "Operations for missions."},
     {"name": "buildings", "description": "Operations for buildings."},
     {"name": "characters", "description": "Operations for characters."},
@@ -33,6 +32,7 @@ tags_metadata = [
 
 app = FastAPI()
 app.include_router(users.router)
+app.include_router(user_events.router)
 app.include_router(buildings.router)
 app.include_router(celebrations.router)
 app.include_router(characters.router)

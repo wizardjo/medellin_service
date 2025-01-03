@@ -1,98 +1,134 @@
 from pydantic import BaseModel
 
-#USER
-class UserBase(BaseModel):
-  name: str
-  email: str
-  password: str
-  registerdatetime: str
 
-  class Config:
-    orm_mode = True
+# USER
+class UserBase(BaseModel):
+    name: str
+    email: str
+    password: str
+    registerdatetime: str
+
+    class Config:
+        orm_mode = True
+
 
 class UserRequest(UserBase):
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class UserResponse(UserBase):
-  id: int
+    id: int
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
 
-#MISSION
+
+# USER_EVENTS
+class UserEventBase(BaseModel):
+    user_id: int
+    event_name: str
+    timestamp: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserEventRequest(UserEventBase):
+    class Config:
+        orm_mode = True
+
+
+class UserEventResponse(UserEventBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+# MISSION
 class MissionBase(BaseModel):
-  name: str
-  description: str
+    name: str
+    description: str
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class MissionRequest(MissionBase):
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class MissionResponse(MissionBase):
-  id: int
+    id: int
 
-  class Config:
-    orm_mode = True
- 
-#BUILD   
+    class Config:
+        orm_mode = True
+
+
+# BUILD
 class BuildBase(BaseModel):
-  name: str
-  description: str
-  cost: int
-  preview_build: str
-  experience_require : int
+    name: str
+    description: str
+    cost: int
+    preview_build: str
+    experience_require: int
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class BuildRequest(BuildBase):
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class BuildResponse(BuildBase):
-  id: int
+    id: int
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
 
-#CHARACTER
+
+# CHARACTER
 class CharacterBase(BaseModel):
-  name: str
-  description: str
+    name: str
+    description: str
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class CharacterRequest(CharacterBase):
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class CharacterResponse(CharacterBase):
-  id: int
+    id: int
 
-  class Config:
-    orm_mode = True
-    
-    
-#CELEBRATION
+    class Config:
+        orm_mode = True
+
+
+# CELEBRATION
 class CelebrationBase(BaseModel):
-  name: str
-  description: str
-  date : str
+    name: str
+    description: str
+    date: str
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class CelebrationRequest(CelebrationBase):
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class CelebrationResponse(CelebrationBase):
-  id: int
+    id: int
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True
