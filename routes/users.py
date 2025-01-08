@@ -69,8 +69,8 @@ def create_user(post_user: UserRequest):
     # Consulta SQL usando parámetros para PostgreSQL
     query = text(
         """
-        INSERT INTO users (name, email, password, registerdatetime) 
-        VALUES (:name, :email, :password, :registerdatetime)
+        INSERT INTO users (id, name, email, password, registerdatetime) 
+        VALUES (:id, :name, :email, :password, :registerdatetime)
         RETURNING id
     """
     )
@@ -92,6 +92,7 @@ def create_user(post_user: UserRequest):
             result = con.execute(
                 query,
                 {
+                    "id": post_user.id,
                     "name": post_user.name,
                     "email": post_user.email,
                     "password": hashed_password,  # Usamos la contraseña hasheada
@@ -104,6 +105,7 @@ def create_user(post_user: UserRequest):
             # Creamos y retornamos el objeto usuario
             new_user = User(**post_user.model_dump())
             new_user.id = user_id
+            new_user.password = "******"
             return new_user
 
         except Exception as e:

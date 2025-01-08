@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     email: str
     password: str
     registerdatetime: str
+    id: str
 
     class Config:
         orm_mode = True
@@ -18,7 +19,7 @@ class UserRequest(UserBase):
 
 
 class UserResponse(UserBase):
-    id: int
+    id: str
 
     class Config:
         orm_mode = True
@@ -26,7 +27,7 @@ class UserResponse(UserBase):
 
 # USER_EVENTS
 class UserEventBase(BaseModel):
-    user_id: int
+    user_id: str
     event_name: str
     timestamp: str
 
