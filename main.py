@@ -18,13 +18,23 @@ from authentication.auth import (
 )
 from db import database
 from db.database import engine
-from routes import users, buildings, celebrations, characters, missions, user_events, user_resources
+from routes import (
+    users,
+    buildings,
+    celebrations,
+    characters,
+    missions,
+    user_events,
+    user_resources,
+    daily_login_bonus,
+)
 
 
 tags_metadata = [
     {"name": "users", "description": "Operations with users."},
     {"name": "user events", "description": "Operations for events."},
-     {"name": "user resources", "description": "Operations for events."},
+    {"name": "user resources", "description": "Operations for events."},
+    {"name": "daily login bonus", "description": "Operations for events."},
     {"name": "missions", "description": "Operations for missions."},
     {"name": "buildings", "description": "Operations for buildings."},
     {"name": "characters", "description": "Operations for characters."},
@@ -35,6 +45,7 @@ app = FastAPI()
 app.include_router(users.router)
 app.include_router(user_events.router)
 app.include_router(user_resources.router)
+app.include_router(daily_login_bonus.router)
 app.include_router(buildings.router)
 app.include_router(celebrations.router)
 app.include_router(characters.router)

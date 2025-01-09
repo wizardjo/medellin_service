@@ -13,3 +13,4 @@ class UserEvent(Base):
 
   # Relación inversa hacia el modelo User
     user = relationship("User", back_populates="events")
+    

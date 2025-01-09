@@ -69,6 +69,11 @@ class UserResourceResponse(UserResourceBase):
     class Config:
         orm_mode = True
 
+# USER_RESOURCES
+class DailyBonusResponse(BaseModel):
+    message: str
+    bonus: dict
+    streak: int
 
 # MISSION
 class MissionBase(BaseModel):
