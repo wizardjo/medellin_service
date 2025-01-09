@@ -47,6 +47,29 @@ class UserEventResponse(UserEventBase):
         orm_mode = True
 
 
+# USER_RESOURCES
+class UserResourceBase(BaseModel):
+    user_id: str
+    food: int = 0
+    gold: int = 0
+    wood: int = 0
+    stone: int = 0
+
+
+class UserResourceUpdate(BaseModel):
+    food: int = 0
+    gold: int = 0
+    wood: int = 0
+    stone: int = 0
+
+
+class UserResourceResponse(UserResourceBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 # MISSION
 class MissionBase(BaseModel):
     name: str
